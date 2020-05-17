@@ -1,0 +1,30 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linearLayout1" >
+    <ImageView
+        android:layout_gravity="center"
+        android:layout_width="300dp"
+        android:layout_height="400dp"
+        android:id="@+id/image"
+        android.src="@drawable/portrait"/>
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:id="@+id/progressBar" />
+    <Button
+        android:text="Take the photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnShoot" />
+    <Button
+        android:text="Face Recognition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnRecog" />
+</LinearLayout>
