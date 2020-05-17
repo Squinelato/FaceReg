@@ -1,0 +1,5 @@
+/obj
+/bin
+Secrets
+FaceReg.csproj.user
+FaceReg.csproj
