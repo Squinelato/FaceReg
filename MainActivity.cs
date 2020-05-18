@@ -106,7 +106,7 @@ namespace FaceReg
 
             image_path = file.AlbumPath;
 
-            byte[] imageArray = System.IO.File.ReadAllBytes(file.Path);
+            byte[] imageArray = File.ReadAllBytes(file.Path);
             Bitmap bitmap = BitmapFactory.DecodeByteArray(imageArray, 0, imageArray.Length);
             original_image = bitmap;
             capturedImage.SetImageBitmap(bitmap);
@@ -132,7 +132,7 @@ namespace FaceReg
 
             string requestParameters = "returnFaceId=false&returnFaceLandmarks=true" + 
                 "&recognitionModel=recognition_01&returnRecognitionModel=false" + 
-                "&detectionModel=detection_01";
+                "&detectionModel=detection_01&returnFaceAttributes=age,gender";
 
             string uri = sct.uriBase + "?" + requestParameters;
 
@@ -144,20 +144,26 @@ namespace FaceReg
             {
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-                response = await client.PostAsync(uri, content);
-
-                string contentString = await response.Content.ReadAsStringAsync();
-
-                var faces = JsonConvert.DeserializeObject<List<AnalysisModel>>(contentString);
-
-                if (faces.Count < 1)
+                try
                 {
-                    Toast.MakeText(this, "no face detected", ToastLength.Long).Show();
-                } else
+                    response = await client.PostAsync(uri, content);
+                    string contentString = await response.Content.ReadAsStringAsync();
+
+                    var faces = JsonConvert.DeserializeObject<List<AnalysisModel>>(contentString);
+
+                    if (faces.Count < 1)
+                    {
+                        Toast.MakeText(this, "no face detected", ToastLength.Long).Show();
+                    } else
+                    {
+                        var resultingbitmap = DrawRectanglesOnBitmap(original_image, faces);
+                        capturedImage.SetImageBitmap(resultingbitmap);
+                    }
+                } catch (Java.Net.UnknownHostException u)
                 {
-                    var resultingbitmap = DrawRectanglesOnBitmap(original_image, faces);
-                    capturedImage.SetImageBitmap(resultingbitmap);
+                    Toast.MakeText(this, "you need Internet connection", ToastLength.Long).Show();
                 }
+
             }
         }
 
@@ -165,20 +171,36 @@ namespace FaceReg
         {
             Bitmap bitmap = mybitmap.Copy(Bitmap.Config.Argb8888, true);
             Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint();
-            paint.AntiAlias = true;
-            paint.SetStyle(Paint.Style.Stroke);
-            paint.Color = Color.Green;
-            paint.StrokeWidth = 8;
 
-            foreach(var face in faces)
+            Paint rectpaint = new Paint();
+            rectpaint.AntiAlias = true;
+            rectpaint.SetStyle(Paint.Style.Stroke);
+            rectpaint.Color = Color.Blue;
+            rectpaint.StrokeWidth = 8;
+
+            Paint textpaint = new Paint();
+            textpaint.Color = Color.Blue;
+            textpaint.TextSize = 30;
+
+            foreach (var face in faces)
             {
                 var faceRectangle = face.faceRectangle;
+
                 canvas.DrawRect(faceRectangle.left, 
                     faceRectangle.top, 
                     faceRectangle.left + faceRectangle.width, 
-                    faceRectangle.top + faceRectangle.height, 
-                    paint);
+                    faceRectangle.top + faceRectangle.height,
+                    rectpaint);
+
+                canvas.DrawText("gender: " + face.faceAttributes.gender, 
+                    faceRectangle.left + faceRectangle.width + 20,
+                    faceRectangle.top - 40,
+                    textpaint);
+
+                canvas.DrawText("age: " + face.faceAttributes.age.ToString("##.#"),
+                    faceRectangle.left + faceRectangle.width + 20,
+                    faceRectangle.top - 10,
+                    textpaint);
             }
             return bitmap;
         }

@@ -33,9 +33,9 @@ namespace FaceReg
     public class FaceAttributes
     {
         public double smile { get; set; }
-        public double gender { get; set; }
+        public string gender { get; set; }
         public double age { get; set; }
-        public double glasses { get; set; }
+        public string glasses { get; set; }
         public Emotion emotion { get; set; }
     }        
 }
